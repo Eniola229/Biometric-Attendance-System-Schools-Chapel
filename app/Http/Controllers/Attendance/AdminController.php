@@ -48,7 +48,7 @@ class AdminController extends Controller
             ]);
             $passportPath = $upload->getSecurePath();
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Error uploading passport image.'], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
 
         // Create New User (Admin/Student)

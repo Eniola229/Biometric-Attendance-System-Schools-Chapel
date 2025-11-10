@@ -44,10 +44,31 @@
 
         <!-- Matric Number Check -->
         <div class="mt-3">
-            <input type="text" id="matricNumber" class="form-control d-inline-block w-auto" placeholder="Enter Matric Number">
+        @if(auth()->user()->role === 'SUPER')
+            <input 
+                type="text" 
+                id="matricNumber" 
+                class="form-control d-inline-block w-auto" 
+                placeholder="Enter Matric Number"
+            >
             <button class="btn btn-success" id="matricCheckin">Check In</button>
             <button class="btn btn-warning" id="matricCheckout">Check Out</button>
+        @else
+            <input 
+                type="text"
+                class="form-control d-inline-block w-auto" 
+                placeholder="Enter Matric Number" 
+                disabled
+            >
+            <button class="btn btn-success" disabled>Check In</button>
+            <button class="btn btn-warning" disabled>Check Out</button>
+
+            <p class="text-danger mt-2 mb-0 small">
+                Only Super Admin can use this feature.
+            </p>
+        @endif
         </div>
+
     </div>
 </main>
 

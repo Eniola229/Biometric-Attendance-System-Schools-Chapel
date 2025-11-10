@@ -7,8 +7,8 @@ from pywinauto.application import Application
 from pywinauto.keyboard import send_keys
 
 # --- PATH CONFIG ---
-EXE_PATH = r"C:\Users\Admin\Desktop\rectemchapel\fingerprint\ftrScanApiEx.exe"
-OUTPUT_JSON = r"C:\Users\Admin\Desktop\rectemchapel\fingerprint\fingerprint_output.json"
+EXE_PATH = r"C:\Users\Admin\Desktop\DESKTOP\RECTEM\rectemchapel\fingerprint\ftrScanApiEx.exe"
+OUTPUT_JSON = r"C:\Users\Admin\Desktop\DESKTOP\RECTEM\rectemchapel\fingerprint\fingerprint_output.json"
 
 def write_result(result):
     """Save result to JSON for Laravel"""
@@ -22,7 +22,7 @@ def main():
     try:
         # Create unique save path each run
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        save_path = rf"C:\Users\Admin\Desktop\rectemchapel\fingerprint\capture_{timestamp}.bmp"
+        save_path = rf"C:\Users\Admin\Desktop\DESKTOP\RECTEM\rectemchapel\fingerprint\capture_{timestamp}.bmp"
 
         # Start Futronic demo app
         app = Application(backend="win32").start(EXE_PATH)

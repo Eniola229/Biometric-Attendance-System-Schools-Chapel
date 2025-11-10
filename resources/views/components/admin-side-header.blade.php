@@ -43,7 +43,7 @@
                 </li>
 
                 {{-- Only ADMIN & SUPER can see Attendance History & Schedule --}}
-                @if(auth()->user()->role == 'SUPER' || auth()->user()->role == 'ADMIN')
+                @if(auth()->user()->role == 'SUPER')
                     <li>
                         <a href="{{ url('admin/attendance/history') }}">
                             <i class="bi bi-circle"></i><span>Attendance History</span>
@@ -52,7 +52,7 @@
                     <li>
                         <a href="{{ url('admin/time') }}">
                             <i class="bi bi-circle"></i><span>Schedule</span>
-                        </a>
+                        </a> 
                     </li>
                 @endif
             </ul>
@@ -73,7 +73,7 @@
         </li>
 
         {{-- Only ADMIN & SUPER can see Admins page --}}
-        @if(auth()->user()->role == 'SUPER' || auth()->user()->role == 'ADMIN')
+        @if(auth()->user()->role == 'SUPER')
             <li class="nav-heading">Pages</li>
             <li class="nav-item">
                 <a class="nav-link collapsed" href="{{ url('admin/admins') }}">

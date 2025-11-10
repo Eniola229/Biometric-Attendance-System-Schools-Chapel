@@ -17,9 +17,11 @@ class StudentController extends Controller
 {
     public function index(): View
     {
-        $students = Student::orderBy('created_at', 'desc')->get();
+        // Fetch students with pagination (10 per page)
+        $students = Student::orderBy('created_at', 'desc')->paginate(10);
+
         return view('admin.students', compact('students'));
-    }  
+    }
 
 public function store(Request $request)
 {
@@ -31,7 +33,7 @@ public function store(Request $request)
         'email'      => 'required|email|unique:students,email',
         'department' => 'required|string|max:255',
         'school'     => 'required|string|max:255',
-        'password'   => 'required|string|min:6|confirmed',
+        'password'   => 'required|string|min:4|confirmed',
     ]);
 
     // --- Upload Passport to Cloudinary ---

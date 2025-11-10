@@ -29,7 +29,7 @@ class AddDateTimeController extends Controller
 
      public function all()
     {
-        return Time::orderBy('day')->get();
+        return Time::orderBy('created_at', 'desc')->get();
     }
 
     public function edit($id)

@@ -42,7 +42,7 @@
                     <th>Matric Number</th>
                     <th>Department</th>
                     <th>Last Modified Date</th>
-                  </tr>
+                  </tr> 
                 </thead>
                 <tbody>
                   @foreach($students as $student)
@@ -68,6 +68,9 @@
                   @endforeach
                 </tbody>
               </table>
+              <div class="mt-3">
+                  {{ $students->links('pagination::bootstrap-5') }}
+              </div>
               <!-- End Table with stripped rows -->
 
             </div>
