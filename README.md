@@ -5,22 +5,23 @@ A comprehensive biometric attendance management system built with Laravel for tr
 ## Features
 
 - **Biometric Authentication**: Fingerprint-based attendance marking
-- **Multi-User Roles**: Support for administrators, teachers, and students
+- **Admin Dashboard**: Comprehensive administrative control panel
 - **Real-time Attendance Tracking**: Instant attendance recording and monitoring
 - **Report Generation**: Comprehensive attendance reports and analytics
-- **Dashboard**: Intuitive admin and user dashboards
 - **Responsive Design**: Mobile-friendly interface using Tailwind CSS
 - **Student/Member Management**: Complete profile and record management
 - **Class/Group Management**: Organize students into classes or groups
+- **Fingerprint Scanner Integration**: C-based fingerprint scanner API
 
 ## Technology Stack
 
 - **Backend**: Laravel 10.x (PHP 8.1+)
 - **Frontend**: Blade Templates, Tailwind CSS, JavaScript
 - **Database**: MySQL
-- **Hardware Integration**: Python scripts for fingerprint scanner communication
+- **Hardware Integration**: C/C++ based fingerprint scanner API
 - **CSS Framework**: Tailwind CSS, SCSS
 - **Build Tool**: Vite
+- **Runtime**: .NET Framework (for fingerprint scanner)
 
 ## Prerequisites
 
@@ -30,9 +31,10 @@ Before setting up the project, ensure you have the following installed:
 - **Composer** (latest version)
 - **Node.js** >= 16.x and npm
 - **MySQL** >= 5.7 or **MariaDB** >= 10.3
-- **Python** >= 3.7 (for fingerprint scanner integration)
+- **.NET Framework** (for fingerprint scanner - see installation below)
 - **Git**
 - **Fingerprint Scanner** (compatible with the system)
+- **C/C++ Compiler** (if you need to recompile the scanner code)
 
 ## Local Setup Instructions
 
@@ -146,24 +148,72 @@ php artisan serve
 
 The application will be available at `http://localhost:8000`
 
-### Step 11: Set Up Fingerprint Scanner (Optional)
+### Step 11: Install .NET Framework (Required for Fingerprint Scanner)
+
+The fingerprint scanner uses a C-based API that requires .NET Framework to run.
+
+**On Windows:**
+
+1. Download and install .NET Framework (if not already installed):
+   - Visit: https://dotnet.microsoft.com/download/dotnet-framework
+   - Download .NET Framework 4.7.2 or higher
+   - Run the installer and follow the prompts
+
+2. Verify installation:
+```cmd
+dotnet --version
+```
+
+**Note**: Most modern Windows systems (Windows 10/11) already have .NET Framework installed.
+
+### Step 12: Set Up and Run Fingerprint Scanner
+
+The fingerprint scanner uses a C program that communicates with the hardware.
 
 1. Navigate to the fingerprint directory:
 ```bash
 cd fingerprint
 ```
 
-2. Install Python dependencies:
+2. Locate the executable file `ftrScanApiEx.exe`
+
+3. **IMPORTANT**: You need to run the fingerprint scanner service in a **separate terminal window** while the Laravel application is running.
+
+**To start the fingerprint scanner service:**
+
+Open a new terminal/command prompt window and run:
+
 ```bash
-pip install -r requirements.txt
+cd fingerprint
+ftrScanApiEx.exe
 ```
 
-3. Configure your fingerprint scanner settings in the Python scripts
+Or simply double-click `ftrScanApiEx.exe` from File Explorer.
 
-4. Run the fingerprint service:
+**The scanner service must remain running** for fingerprint enrollment and attendance marking to work.
+
+4. Ensure your fingerprint scanner is connected via USB before starting the service.
+
+5. The scanner service will start listening for fingerprint scans and communicate with the Laravel application.
+
+### Step 13: Verify Everything is Running
+
+You should now have **TWO separate terminal windows** running:
+
+**Terminal 1** - Laravel Development Server:
 ```bash
-python fingerprint_service.py
+php artisan serve
 ```
+Should show: `Server running on [http://localhost:8000]`
+
+**Terminal 2** - Fingerprint Scanner Service:
+```bash
+cd fingerprint
+ftrScanApiEx.exe
+```
+Should show scanner initialization messages and be waiting for fingerprint input.
+
+Now open your browser and navigate to `http://localhost:8000`
 
 ## Default Login Credentials
 
@@ -171,14 +221,6 @@ After running the seeders, you can use these default credentials:
 
 - **Admin**:
   - Email: admin@example.com
-  - Password: password
-
-- **Teacher**:
-  - Email: teacher@example.com
-  - Password: password
-
-- **Student**:
-  - Email: student@example.com
   - Password: password
 
 **Important**: Change these credentials immediately in production!
@@ -196,7 +238,11 @@ After running the seeders, you can use these default credentials:
 ├── database/              # Migrations, seeders, factories
 │   ├── migrations/        # Database migrations
 │   └── seeders/          # Database seeders
-├── fingerprint/           # Python scripts for fingerprint integration
+├── fingerprint/           # C/C++ code for fingerprint scanner integration
+│   ├── ftrScanApiEx.exe  # Fingerprint scanner service (must be running)
+│   ├── *.c               # C source files
+│   ├── *.h               # Header files
+│   └── *.dll             # Required DLL libraries
 ├── public/                # Public assets (CSS, JS, images)
 ├── resources/             # Views, raw assets
 │   ├── css/              # SCSS files
@@ -239,10 +285,28 @@ php artisan cache:clear
 
 ### Issue 6: Fingerprint scanner not detected
 **Solution**:
-- Check USB connection
+- Ensure .NET Framework is installed
+- Check that `ftrScanApiEx.exe` is running in a separate terminal
+- Verify USB connection of fingerprint scanner
 - Install proper drivers for your scanner
-- Verify scanner compatibility
-- Check Python dependencies
+- Check if scanner is recognized in Device Manager (Windows)
+- Try running `ftrScanApiEx.exe` as Administrator
+- Ensure no other application is using the scanner
+
+### Issue 7: `ftrScanApiEx.exe` won't start
+**Solution**:
+- Install/Reinstall .NET Framework
+- Check for missing DLL files in the fingerprint folder
+- Run as Administrator
+- Check Windows Event Viewer for error details
+- Verify fingerprint scanner is properly connected
+
+### Issue 8: Laravel can't communicate with fingerprint service
+**Solution**:
+- Ensure both Laravel server and `ftrScanApiEx.exe` are running
+- Check firewall settings
+- Verify port configurations in both applications
+- Check Laravel logs: `storage/logs/laravel.log`
 
 ## Running Tests
 
@@ -258,19 +322,42 @@ vendor/bin/phpunit
 
 ## Development Workflow
 
-1. **For backend changes**:
+1. **Starting the development environment**:
+   
+   **Terminal 1** - Start Laravel:
+   ```bash
+   php artisan serve
+   ```
+   
+   **Terminal 2** - Start Fingerprint Service:
+   ```bash
+   cd fingerprint
+   ftrScanApiEx.exe
+   ```
+   
+   **Terminal 3** (Optional)** - Frontend hot-reload:
+   ```bash
+   npm run dev
+   ```
+
+2. **For backend changes**:
    - Modify PHP files in `app/` directory
    - Clear cache: `php artisan cache:clear`
 
-2. **For frontend changes**:
+3. **For frontend changes**:
    - Edit Blade files in `resources/views/`
    - Modify CSS in `resources/css/`
    - Modify JS in `resources/js/`
    - Run: `npm run dev` for hot-reload
 
-3. **For database changes**:
+4. **For database changes**:
    - Create migration: `php artisan make:migration migration_name`
    - Run migration: `php artisan migrate`
+
+5. **For fingerprint scanner changes**:
+   - Modify C source files in `fingerprint/` directory
+   - Recompile if necessary (requires C compiler)
+   - Restart `ftrScanApiEx.exe` to apply changes
 
 ## Deployment
 
@@ -296,7 +383,33 @@ php artisan view:cache
 
 4. Set proper file permissions
 
-5. Configure web server (Apache/Nginx) to point to `public/` directory
+5. **Set up fingerprint scanner service**:
+   - Ensure .NET Framework is installed on production server
+   - Copy `fingerprint/` folder to production server
+   - Set up `ftrScanApiEx.exe` to run as a Windows Service for continuous operation
+   - Configure Windows Task Scheduler to start the service on boot
+
+6. Configure web server (Apache/Nginx) to point to `public/` directory
+
+## Running Fingerprint Service as Windows Service (Production)
+
+For production, you should run `ftrScanApiEx.exe` as a Windows Service so it starts automatically:
+
+1. **Using NSSM (Non-Sucking Service Manager)**:
+   
+   Download NSSM from: https://nssm.cc/download
+   
+   ```cmd
+   nssm install FingerprintScannerService "C:\path\to\your\project\fingerprint\ftrScanApiEx.exe"
+   nssm start FingerprintScannerService
+   ```
+
+2. **Or use Windows Task Scheduler**:
+   - Open Task Scheduler
+   - Create a new task
+   - Set trigger to "At startup"
+   - Set action to run `ftrScanApiEx.exe`
+   - Configure to run whether user is logged on or not
 
 ## Security Considerations
 
@@ -310,14 +423,21 @@ php artisan view:cache
 
 ## Hardware Requirements
 
-### Recommended Fingerprint Scanners:
-- DigitalPersona U.are.U 4500
-- ZKTeco fingerprint scanners
-- Any UART-compatible fingerprint sensor module (R305, R307, etc.)
+### Fingerprint Scanner Compatibility:
+- The system uses a C-based API (`ftrScanApiEx.exe`)
+- Compatible with most USB fingerprint scanners that support Windows drivers
+- Common compatible models:
+  - DigitalPersona U.are.U series
+  - ZKTeco fingerprint scanners
+  - Futronic fingerprint scanners
+  - SecuGen fingerprint scanners
 
 ### System Requirements:
+- **Operating System**: Windows 7/8/10/11 (required for .NET Framework and fingerprint service)
 - **Minimum**: 2GB RAM, dual-core processor
 - **Recommended**: 4GB RAM, quad-core processor, SSD
+- **.NET Framework**: 4.7.2 or higher
+- **USB Port**: For fingerprint scanner connection
 
 ## Contributing
 
